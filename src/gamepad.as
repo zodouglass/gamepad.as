@@ -92,6 +92,13 @@ public class gamepad extends EventDispatcher
 					case 1:
 						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_AXIS_ONE_Y_CHANGE, int(gamepadId), newValue));
 						break;
+					case 2:
+							//this.dispatchEvent(new Event("player_" + gamepadId +"_axis_" + i + "_change") );
+						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_AXIS_TWO_X_CHANGE, int(gamepadId), newValue));
+						break;
+					case 3:
+						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_AXIS_TWO_Y_CHANGE, int(gamepadId), newValue));
+						break;
 				}
 			
 				
@@ -129,6 +136,10 @@ public class gamepad extends EventDispatcher
 				//TODO
 				switch( i ) {
 					case 0:
+					case 1:
+					case 2:
+					case 3:
+					default:
 						//ExternalInterface.call("console.log",gamepadId + "ButtonZERO" + i + " CHANGED " +   oldValue + ", " + newValue  );
 						if ( newValue == 0 ) //up
 						{
@@ -140,6 +151,59 @@ public class gamepad extends EventDispatcher
 							this.dispatchEvent(new Event("player_" + gamepadId +"_button_" + i + "_down") );
 							ExternalInterface.call("console.log","player_" + gamepadId +"_button_" + i + "_down" );
 						}
+						break;
+						
+					case 4:
+						if ( newValue == 0 ) //up
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_LEFT_BUTTON_UP, int(gamepadId), newValue));
+						else
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_LEFT_BUTTON_DOWN, int(gamepadId), newValue));
+						break;
+					case 5:
+						if ( newValue == 0 ) //up
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_RIGHT_BUTTON_UP, int(gamepadId), newValue));
+						else
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_RIGHT_BUTTON_DOWN, int(gamepadId), newValue));
+						break;
+					case 6:
+						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_LEFT_TRIGGER_CHANGE, int(gamepadId), newValue));
+						ExternalInterface.call("console.log", "player_" + gamepadId +"_button_" + i + "_down" );
+						break;
+					case 7:
+						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_RIGHT_TRIGGER_CHANGE, int(gamepadId), newValue));
+						ExternalInterface.call("console.log", "player_" + gamepadId +"_button_" + i + "_down" );
+						break;
+						
+					//dpad-top
+					case 12:
+						if ( newValue == 0 ) //up
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_TOP_UP, int(gamepadId), newValue));
+						else
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_TOP_DOWN, int(gamepadId), newValue));
+						break;
+					//dpad-bottom
+					case 13:
+						if ( newValue == 0 ) //up
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_BOTTOM_UP, int(gamepadId), newValue));
+						else
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_BOTTOM_DOWN, int(gamepadId), newValue));
+						break;
+						break;
+					//dpad left
+					case 14:
+						if ( newValue == 0 ) //up
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_LEFT_UP, int(gamepadId), newValue));
+						else
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_LEFT_DOWN, int(gamepadId), newValue));
+						break;
+						break;
+					//dpad right
+					case 15:
+						if ( newValue == 0 ) //up
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_RIGHT_UP, int(gamepadId), newValue));
+						else
+							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_RIGHT_DOWN, int(gamepadId), newValue));
+						break;
 						break;
 				}
 				
