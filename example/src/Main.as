@@ -11,7 +11,6 @@ package
 	 */
 	public class Main extends Sprite 
 	{
-		private var gamepads:gamepad = new gamepad();
 		public function Main():void 
 		{
 			if (stage) init();
@@ -25,8 +24,8 @@ package
 			// entry point
 			
 			//ExternalInterface.call("console.log", "starting gamepads");
-			gamepads.addEventListener("player_0_button_0_down", playerOneButtonDown );
-			gamepads.addEventListener("player_0_button_0_up", playerOneButtonUp );
+			Gamepad.playerOne.addEventListener(GamepadEvent.BUTTON_0_DOWN, playerOneButtonDown );
+			Gamepad.playerOne.addEventListener(GamepadEvent.BUTTON_0_UP, playerOneButtonUp );
 			
 			
 			

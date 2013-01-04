@@ -1,4 +1,4 @@
-var FLASH_GAME_OBJECT_ID = "AS3GamepadExample"; //replace with the name of your flash object id
+var FLASH_GAME_OBJECT_ID = "swfContent";
 
 var gamepadSupport = 
 {
@@ -12,9 +12,11 @@ var gamepadSupport =
 		console.log("gamepadSupport.init");
 		var gamepadSupportAvailable = !! navigator.webkitGetGamepads || !! navigator.webkitGamepads || (navigator.userAgent.indexOf('Firefox/') != -1);
 		if (!gamepadSupportAvailable) {
-			//tester.showNotSupported();
-			console.log("browser not supported");
+			//todo - call flash function, browserNotSupported
+			console.log("gamepad.js: Broswer not supported");
 		} else {
+			//todo - call flash function, browserSupported
+			console.log("gamepad.js: Broswer IS supported");
 			window.addEventListener('MozGamepadConnected', gamepadSupport.onGamepadConnect, false);
 			window.addEventListener('MozGamepadDisconnected', gamepadSupport.onGamepadDisconnect, false);
 			if ( !! navigator.webkitGamepads || !! navigator.webkitGetGamepads) {

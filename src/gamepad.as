@@ -12,7 +12,6 @@ package
  * AS3 JS Gamepad wrapper class
  * 
  * Usage:
-	 * Gamepad.init();
 	 * Gamepad.playerOne.addEventListener(GamepadEvent.START_DOWN, onStartPress );
  * @author Zo
  * 
@@ -26,20 +25,44 @@ public class Gamepad
 	private static var playerButtons:Dictionary = new Dictionary();
 	private static var playerAxes:Dictionary = new Dictionary();
 	
-	public static var playerOne:EventDispatcher = new EventDispatcher();
-	public static var playerTwo:EventDispatcher = new EventDispatcher();
-	public static var playerThree:EventDispatcher = new EventDispatcher();
-	public static var playerFour:EventDispatcher = new EventDispatcher();
+	private static var _playerOne:EventDispatcher = new EventDispatcher();
+	private static var _playerTwo:EventDispatcher = new EventDispatcher();
+	private static var _playerThree:EventDispatcher = new EventDispatcher();
+	private static var _playerFour:EventDispatcher = new EventDispatcher();
 	
 	protected static var initilized:Boolean = false;
-	
 	
 	public function Gamepad():void 
 	{
 		throw new Error("Dont create a new Gamepad object.  Add event listeners to static public variables playerOne, playerTwo, etc., after calling Gamepad.init();")
 	}
 	
-	public static function init():void
+	public static function get playerOne():EventDispatcher
+	{
+		if ( !initilized )
+			init();
+		return _playerOne;
+	}
+	public static function get playerTwo():EventDispatcher
+	{
+		if ( !initilized )
+			init();
+		return _playerTwo;
+	}
+	public static function get playerThree():EventDispatcher
+	{
+		if ( !initilized )
+			init();
+		return _playerThree;
+	}
+	public static function get playerFour():EventDispatcher
+	{
+		if ( !initilized )
+			init();
+		return _playerFour;
+	}
+	
+	protected static function init():void
 	{
 		if ( ExternalInterface.available  && !initilized)
 		{
