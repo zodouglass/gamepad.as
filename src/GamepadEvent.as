@@ -3,72 +3,72 @@ package
 	import flash.events.Event;
 	
 	/**
-	 * ...
+	 * Gamepad events representing xbox 360 like controller
 	 * @author Zo
 	 */
 	public class GamepadEvent extends Event 
 	{
-		//PLAYER ZERO
+		public static var CONNECT:String = "connect";
 		
-		//button zero
-		public static var PLAYER_0_BUTTON_0_UP:String = "player_0_button_0_up";
-		public static var PLAYER_0_BUTTON_0_DOWN:String = "player_0_button_0_down";
+		//button zero - A
+		public static var BUTTON_0_UP:String = "button_0_up";
+		public static var BUTTON_0_DOWN:String = "button_0_down";
 		
 		//button one
-		public static var PLAYER_0_BUTTON_1_UP:String = "player_0_button_1_up";
-		public static var PLAYER_0_BUTTON_1_DOWN:String = "player_0_button_1_down";
+		public static var BUTTON_1_UP:String = "button_1_up";
+		public static var BUTTON_1_DOWN:String = "button_1_down";
 		//button two
-		public static var PLAYER_0_BUTTON_2_UP:String = "player_0_button_2_up";
-		public static var PLAYER_0_BUTTON_2_DOWN:String = "player_0_button_2_down";
+		public static var BUTTON_2_UP:String = "button_2_up";
+		public static var BUTTON_2_DOWN:String = "button_2_down";
 		//button three
-		public static var PLAYER_0_BUTTON_3_UP:String = "player_0_button_3_up";
-		public static var PLAYER_0_BUTTON_3_DOWN:String = "player_0_button_3_down";
+		public static var BUTTON_3_UP:String = "button_3_up";
+		public static var BUTTON_3_DOWN:String = "button_3_down";
 		
 		//right shoulder
-		public static var PLAYER_0_RIGHT_SHOULDER_UP:String = "player_0_right_shoulder_up";
-		public static var PLAYER_0_RIGHT_SHOULDER_DOWN:String = "player_0_right_shoulder_down";
+		public static var RIGHT_SHOULDER_UP:String = "right_shoulder_up";
+		public static var RIGHT_SHOULDER_DOWN:String = "right_shoulder_down";
 		//left shoulder
-		public static var PLAYER_0_LEFT_SHOULDER_UP:String = "player_0_left_shoulder_up";
-		public static var PLAYER_0_LEFT_SHOULDER_DOWN:String = "player_0_left_shoulder_down";
+		public static var LEFT_SHOULDER_UP:String = "left_shoulder_up";
+		public static var LEFT_SHOULDER_DOWN:String = "left_shoulder_down";
 		
 		//right analog trigger
-		public static var PLAYER_0_RIGHT_TRIGGER_CHANGE:String = "player_0_right_trigger_change";
+		public static var RIGHT_TRIGGER_CHANGE:String = "right_trigger_change";
 		//left analog trigger
-		public static var PLAYER_0_LEFT_TRIGGER_CHANGE:String = "player_0_left_trigger_change";
+		public static var LEFT_TRIGGER_CHANGE:String = "left_trigger_change";
 		
 		//left top button
-		public static var PLAYER_0_LEFT_BUTTON_UP:String = "player_0_left_button_up";
-		public static var PLAYER_0_LEFT_BUTTON_DOWN:String = "player_0_left_button_down";
+		public static var LEFT_BUTTON_UP:String = "left_button_up";
+		public static var LEFT_BUTTON_DOWN:String = "left_button_down";
 		//right top button
-		public static var PLAYER_0_RIGHT_BUTTON_UP:String = "player_0_left_button_up";
-		public static var PLAYER_0_RIGHT_BUTTON_DOWN:String = "player_0_right_button_down";
+		public static var RIGHT_BUTTON_UP:String = "left_button_up";
+		public static var RIGHT_BUTTON_DOWN:String = "right_button_down";
 		
 		
 		
 		//axis one
-		public static var PLAYER_0_AXIS_ONE_X_CHANGE:String = "player_0_axis_one_x_change";
-		public static var PLAYER_0_AXIS_ONE_Y_CHANGE:String = "player_0_axis_one_y_change";
+		public static var AXIS_ONE_X_CHANGE:String = "axis_one_x_change";
+		public static var AXIS_ONE_Y_CHANGE:String = "axis_one_y_change";
 		//axis two
-		public static var PLAYER_0_AXIS_TWO_X_CHANGE:String = "player_0_axis_two_x_change";
-		public static var PLAYER_0_AXIS_TWO_Y_CHANGE:String = "player_0_axis_two_y_change";
+		public static var AXIS_TWO_X_CHANGE:String = "axis_two_x_change";
+		public static var AXIS_TWO_Y_CHANGE:String = "axis_two_y_change";
 		
 		//select
-		public static var PLAYER_0_SELECT_DOWN:String = "player_0_select_down";
-		public static var PLAYER_0_SELECT_UP:String = "player_0_select_up";
+		public static var SELECT_DOWN:String = "select_down";
+		public static var SELECT_UP:String = "select_up";
 		
 		//start
-		public static var PLAYER_0_START_DOWN:String = "player_0_start_down";
-		public static var PLAYER_0_START_UP:String = "player_0_start_up";
+		public static var START_DOWN:String = "start_down";
+		public static var START_UP:String = "start_up";
 		
 		//D-pad
-		public static var PLAYER_0_DPAD_TOP_DOWN:String = "player_0_dpad_top_down";
-		public static var PLAYER_0_DPAD_TOP_UP:String = "player_0_dpad_top_up";
-		public static var PLAYER_0_DPAD_BOTTOM_DOWN:String = "player_0_dpad_bottom_down";
-		public static var PLAYER_0_DPAD_BOTTOM_UP:String = "player_0_dpad_bottom_up";
-		public static var PLAYER_0_DPAD_LEFT_DOWN:String = "player_0_dpad_left_down";
-		public static var PLAYER_0_DPAD_LEFT_UP:String = "player_0_dpad_left_up";
-		public static var PLAYER_0_DPAD_RIGHT_DOWN:String = "player_0_dpad_right_down";
-		public static var PLAYER_0_DPAD_RIGHT_UP:String = "player_0_dpad_right_up";
+		public static var DPAD_TOP_DOWN:String = "dpad_top_down";
+		public static var DPAD_TOP_UP:String = "dpad_top_up";
+		public static var DPAD_BOTTOM_DOWN:String = "dpad_bottom_down";
+		public static var DPAD_BOTTOM_UP:String = "dpad_bottom_up";
+		public static var DPAD_LEFT_DOWN:String = "dpad_left_down";
+		public static var DPAD_LEFT_UP:String = "dpad_left_up";
+		public static var DPAD_RIGHT_DOWN:String = "dpad_right_down";
+		public static var DPAD_RIGHT_UP:String = "dpad_right_up";
 		//
 		
 		/*

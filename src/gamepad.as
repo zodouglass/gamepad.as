@@ -9,21 +9,39 @@ package
 	import flash.utils.Timer;
  
 /**
- * Embedded Javascript AS3 Gamepad API
+ * AS3 JS Gamepad wrapper class
+ * 
+ * Usage:
+	 * Gamepad.init();
+	 * Gamepad.playerOne.addEventListener(GamepadEvent.START_DOWN, onStartPress );
  * @author Zo
  * 
  */
-public class gamepad extends EventDispatcher
+public class Gamepad
 {	
-	private var timer:Timer = new Timer(100);
+	//how often we poll javascript to get the gamepad states
+	private static var timer:Timer = new Timer(100);
 	
 	//diction of button arrays sorted by controler id
-	private var playerButtons:Dictionary = new Dictionary();
-	private var playerAxes:Dictionary = new Dictionary();
- 
-	public function gamepad():void 
+	private static var playerButtons:Dictionary = new Dictionary();
+	private static var playerAxes:Dictionary = new Dictionary();
+	
+	public static var playerOne:EventDispatcher = new EventDispatcher();
+	public static var playerTwo:EventDispatcher = new EventDispatcher();
+	public static var playerThree:EventDispatcher = new EventDispatcher();
+	public static var playerFour:EventDispatcher = new EventDispatcher();
+	
+	protected static var initilized:Boolean = false;
+	
+	
+	public function Gamepad():void 
 	{
-		if ( ExternalInterface.available )
+		throw new Error("Dont create a new Gamepad object.  Add event listeners to static public variables playerOne, playerTwo, etc., after calling Gamepad.init();")
+	}
+	
+	public static function init():void
+	{
+		if ( ExternalInterface.available  && !initilized)
 		{
 			ExternalInterface.call("console.log", "gamepad constructor" );
 			ExternalInterface.addCallback("updateButtons", updateButtons );
@@ -31,27 +49,26 @@ public class gamepad extends EventDispatcher
 			ExternalInterface.addCallback("onGamepadConnect", onGamepadConnect );
 			ExternalInterface.addCallback("startTicking", startTicking );
 			
-			//use embedded js
-			//var gamepadResult:String = ExternalInterface.call(JS.gamepadjs);
-			
 			timer.addEventListener(TimerEvent.TIMER, tick); 
 			
 			//call js functions, not embedded
-			ExternalInterface.call("tester.init");
 			ExternalInterface.call("gamepadSupport.init");
+			
+			initilized = true;
 			
 		}
 		else
 			trace("Gamepad API can only run in a browser");
 	}
+ 
 	
-	public function startTicking():void
+	protected static function startTicking():void
 	{
 		ExternalInterface.call("console.log", "start gamepad" );
 		timer.start();
 	}
 	
-	public function tick(e:Event=null):void
+	protected static function tick(e:Event=null):void
 	{
 		//ExternalInterface.call("console.log", "as ticing" );
 		if ( ExternalInterface.available )
@@ -59,18 +76,14 @@ public class gamepad extends EventDispatcher
 			//var gamepadtick:String = ExternalInterface.call(JS.tick);
 	}
 	
-	public function onGamepadConnect(gamepads:Array):void
+	protected static function onGamepadConnect(gamepads:Array):void
 	{
+		ExternalInterface.call("console.log", "gamepad.as onGamepadConnect " + gamepads);
 		
-		ExternalInterface.call("console.log", "gamepad onGamepadConnect " + gamepads);
-		
+		playerOne.dispatchEvent(new GamepadEvent(GamepadEvent.CONNECT, 0, 1 ));
 	}
-	public function updateAxes(axes:Array, gamepadId:String ):void
+	protected static function updateAxes(axes:Array, gamepadId:String ):void
 	{
-		//trace(axes);
-		ExternalInterface.call("console.log", gamepadId + "Axes: " + axes );
-		//ExternalInterface.call("console.log", "updateAxes");
-		
 		for ( var i:int = 0; i < axes.length; i++ )
 		{
 			if ( playerAxes[gamepadId] ==  null )
@@ -79,46 +92,39 @@ public class gamepad extends EventDispatcher
 			var oldValue:Number = playerAxes[gamepadId][i];
 			var newValue:Number = axes[i];
 			
-			//ExternalInterface.call("console.log", "player_" + gamepadId +"_axis_" + i + "_change"  );
-			if (!isNaN(oldValue) && oldValue != newValue ) //button has changed
-			{
+			//check if the axis has changed
+			if (!isNaN(oldValue) && oldValue != newValue ) 
+				axisChange(i, Number(gamepadId), newValue);
 				
-				
-				switch( i ) {
-					case 0:
-							//this.dispatchEvent(new Event("player_" + gamepadId +"_axis_" + i + "_change") );
-						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_AXIS_ONE_X_CHANGE, int(gamepadId), newValue));
-						break;
-					case 1:
-						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_AXIS_ONE_Y_CHANGE, int(gamepadId), newValue));
-						break;
-					case 2:
-							//this.dispatchEvent(new Event("player_" + gamepadId +"_axis_" + i + "_change") );
-						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_AXIS_TWO_X_CHANGE, int(gamepadId), newValue));
-						break;
-					case 3:
-						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_AXIS_TWO_Y_CHANGE, int(gamepadId), newValue));
-						break;
-				}
-			
-				
-				//dispatchButtonEvent(i, oldValue, newValue );
-				//this.dispatchEvent(new Event("player" + id +"_button" + index) );
-				//save the current button state
-				
-			}
+			//save the current axis state
 			playerAxes[gamepadId][i] = newValue;
 		}
 		
 	}
 	
-	public function updateButtons(buttons:Array, gamepadId:Number ):void
+	protected static function axisChange(i:int, gamepadId:Number, newValue:Number):void
 	{
-		//trace(buttons);
-		//ExternalInterface.call("console.log", "updateButtons");
-		ExternalInterface.call("console.log",gamepadId + "Buttons: " +   buttons  );
-		//go through each button and compare it to the current button state.
-		
+		//ExternalInterface.call("console.log", "axisChange " + gamepadId + " " + newValue );
+		switch( i ) {
+			case 0:
+				dispatchGamepadEvent(GamepadEvent.AXIS_ONE_X_CHANGE, int(gamepadId), newValue);
+				break;
+			case 1:
+				dispatchGamepadEvent(GamepadEvent.AXIS_ONE_Y_CHANGE, int(gamepadId), newValue);
+				break;
+			case 2:
+				dispatchGamepadEvent(GamepadEvent.AXIS_TWO_X_CHANGE, int(gamepadId), newValue);
+				break;
+			case 3:
+				dispatchGamepadEvent(GamepadEvent.AXIS_TWO_Y_CHANGE, int(gamepadId), newValue);
+				break;
+		}
+	}
+	
+	protected static function updateButtons(buttons:Array, gamepadId:Number ):void
+	{
+		//ExternalInterface.call("console.log",gamepadId + "Buttons: " +   buttons  );
+		//go through each button and compare it to the current button state
 		for ( var i:int = 0; i < buttons.length; i++ )
 		{
 			if ( playerButtons[gamepadId] ==  null )
@@ -127,281 +133,124 @@ public class gamepad extends EventDispatcher
 			var oldValue:Number = playerButtons[gamepadId][i];
 			var newValue:Number = buttons[i];
 			
-			
-			if (!isNaN(oldValue) && oldValue != newValue ) //button has changed
-			{
+			//check if the button has changed
+			if (!isNaN(oldValue) && oldValue != newValue ) 
+				buttonChange(i, gamepadId, newValue );
 				
-				//determine if it turned on or off
-				//dispatch corrent event
-				//TODO
-				switch( i ) {
-					case 0:
-					case 1:
-					case 2:
-					case 3:
-					default:
-						//ExternalInterface.call("console.log",gamepadId + "ButtonZERO" + i + " CHANGED " +   oldValue + ", " + newValue  );
-						if ( newValue == 0 ) //up
-						{
-							ExternalInterface.call("console.log","player_" + gamepadId +"_button_" + i + "_up"  );
-							this.dispatchEvent(new Event("player_" + gamepadId +"_button_" + i + "_up") );
-						}
-						else //down
-						{
-							this.dispatchEvent(new Event("player_" + gamepadId +"_button_" + i + "_down") );
-							ExternalInterface.call("console.log","player_" + gamepadId +"_button_" + i + "_down" );
-						}
-						break;
-						
-					case 4:
-						if ( newValue == 0 ) //up
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_LEFT_BUTTON_UP, int(gamepadId), newValue));
-						else
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_LEFT_BUTTON_DOWN, int(gamepadId), newValue));
-						break;
-					case 5:
-						if ( newValue == 0 ) //up
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_RIGHT_BUTTON_UP, int(gamepadId), newValue));
-						else
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_RIGHT_BUTTON_DOWN, int(gamepadId), newValue));
-						break;
-					case 6:
-						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_LEFT_TRIGGER_CHANGE, int(gamepadId), newValue));
-						ExternalInterface.call("console.log", "player_" + gamepadId +"_button_" + i + "_down" );
-						break;
-					case 7:
-						this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_RIGHT_TRIGGER_CHANGE, int(gamepadId), newValue));
-						ExternalInterface.call("console.log", "player_" + gamepadId +"_button_" + i + "_down" );
-						break;
-						
-					//dpad-top
-					case 12:
-						if ( newValue == 0 ) //up
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_TOP_UP, int(gamepadId), newValue));
-						else
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_TOP_DOWN, int(gamepadId), newValue));
-						break;
-					//dpad-bottom
-					case 13:
-						if ( newValue == 0 ) //up
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_BOTTOM_UP, int(gamepadId), newValue));
-						else
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_BOTTOM_DOWN, int(gamepadId), newValue));
-						break;
-						break;
-					//dpad left
-					case 14:
-						if ( newValue == 0 ) //up
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_LEFT_UP, int(gamepadId), newValue));
-						else
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_LEFT_DOWN, int(gamepadId), newValue));
-						break;
-						break;
-					//dpad right
-					case 15:
-						if ( newValue == 0 ) //up
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_RIGHT_UP, int(gamepadId), newValue));
-						else
-							this.dispatchEvent(new GamepadEvent(GamepadEvent.PLAYER_0_DPAD_RIGHT_DOWN, int(gamepadId), newValue));
-						break;
-						break;
-				}
-				
-				//dispatchButtonEvent(i, oldValue, newValue );
-				//this.dispatchEvent(new Event("player" + id +"_button" + index) );
-				//save the current button state
-				
-			}
+			//save the current button state
 			playerButtons[gamepadId][i] = newValue;
 		}
-		/*
-		updateButton(buttons[0], gamepadId, 'button-1');
-		updateButton(buttons[1], gamepadId, 'button-2');
-		updateButton(buttons[2], gamepadId, 'button-3');
-		updateButton(buttons[3], gamepadId, 'button-4');
-		updateButton(buttons[4], gamepadId, 'button-left-shoulder-top');
-		updateButton(buttons[6], gamepadId, 'button-left-shoulder-bottom');
-		updateButton(buttons[5], gamepadId, 'button-right-shoulder-top');
-		updateButton(buttons[7], gamepadId, 'button-right-shoulder-bottom');
-		updateButton(buttons[8], gamepadId, 'button-select');
-		updateButton(buttons[9], gamepadId, 'button-start');
-		updateButton(buttons[10], gamepadId, 'stick-1');
-		updateButton(buttons[11], gamepadId, 'stick-2');
-		updateButton(buttons[12], gamepadId, 'button-dpad-top');
-		updateButton(buttons[13], gamepadId, 'button-dpad-bottom');
-		updateButton(buttons[14], gamepadId, 'button-dpad-left');
-		updateButton(buttons[15], gamepadId, 'button-dpad-right');
-		*/
-		//updateAxis(gamepad.axes[0], gamepadId, 'stick-1-axis-x', 'stick-1', true);
-		//updateAxis(gamepad.axes[1], gamepadId, 'stick-1-axis-y', 'stick-1', false);
-		//updateAxis(gamepad.axes[2], gamepadId, 'stick-2-axis-x', 'stick-2', true);
-		//updateAxis(gamepad.axes[3], gamepadId, 'stick-2-axis-y', 'stick-2', false);
-	}
-	
-	protected function updateButton(index:int, id:Number):void
-	{
 		
 	}
 	
-	
-	
-	
-	
- 
-}
- 
-}//end gamepad as
-
-/******************************************
- * 				JAVASCRIPT
- *****************************************/
-class JS {
-	
-	static public var tick:XML =
-	<script>
-	<![CDATA[
-	function() 
+	protected static function buttonChange(i:int, gamepadId:uint, newValue:Number ):void
 	{
-		var gamepadSupport = 
-{
-	TYPICAL_BUTTON_COUNT: 16,
-	TYPICAL_AXIS_COUNT: 4,
-	ticking: false,
-	gamepads: [],
-	prevRawGamepadTypes: [],
-	prevTimestamps: [],
-	init: function () {
-		console.log("gamepadSupport.init");
-		var gamepadSupportAvailable = !! navigator.webkitGetGamepads || !! navigator.webkitGamepads || (navigator.userAgent.indexOf('Firefox/') != -1);
-		if (!gamepadSupportAvailable) {
-			tester.showNotSupported();
-		} else {
-			window.addEventListener('MozGamepadConnected', gamepadSupport.onGamepadConnect, false);
-			window.addEventListener('MozGamepadDisconnected', gamepadSupport.onGamepadDisconnect, false);
-			if ( !! navigator.webkitGamepads || !! navigator.webkitGetGamepads) {
-				gamepadSupport.startPolling();
-				
-			}
-		}
-	},
-	onGamepadConnect: function (event) {
-		console.log("js onGamepadConnect");
-		gamepadSupport.gamepads.push(event.gamepad);
-		//tester.updateGamepads(gamepadSupport.gamepads);
-		document.getElementById("AS3Gamepadexample").onGamepadConnect();
-		gamepadSupport.startPolling();
-	},
-	onGamepadDisconnect: function (event) {
-		for (var i in gamepadSupport.gamepads) {
-			if (gamepadSupport.gamepads[i].index == event.gamepad.index) {
-				gamepadSupport.gamepads.splice(i, 1);
+		//ExternalInterface.call("console.log", "buttonChange " + gamepadId + " " + newValue );
+		//determine which button has changed
+		switch( i ) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			default:
+				if ( newValue == 0 ) //up
+					dispatchGamepadEvent("button_" + i + "_up", gamepadId, newValue );
+				else //down
+					dispatchGamepadEvent("button_" + i + "_down", gamepadId, newValue );
 				break;
-			}
+			//left bumper	
+			case 4:
+				if ( newValue == 0 )
+					dispatchGamepadEvent(GamepadEvent.LEFT_BUTTON_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.LEFT_BUTTON_DOWN, int(gamepadId), newValue);
+				break;
+			//right bumper
+			case 5:
+				if ( newValue == 0 ) 
+					dispatchGamepadEvent(GamepadEvent.RIGHT_BUTTON_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.RIGHT_BUTTON_DOWN, int(gamepadId), newValue);
+				break;
+			//left trigger
+			case 6:
+				dispatchGamepadEvent(GamepadEvent.LEFT_TRIGGER_CHANGE, int(gamepadId), newValue);
+				break;
+			//right trigger
+			case 7:
+				dispatchGamepadEvent(GamepadEvent.RIGHT_TRIGGER_CHANGE, int(gamepadId), newValue);
+				break;
+			
+			//select
+			case 8:
+				if ( newValue == 0 )
+					dispatchGamepadEvent(GamepadEvent.SELECT_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.SELECT_DOWN, int(gamepadId), newValue);
+				break;
+			//start
+			case 9:
+				if ( newValue == 0 )
+					dispatchGamepadEvent(GamepadEvent.START_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.START_DOWN, int(gamepadId), newValue);
+				break;
+				
+			//dpad-top
+			case 12:
+				if ( newValue == 0 )
+					dispatchGamepadEvent(GamepadEvent.DPAD_TOP_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.DPAD_TOP_DOWN, int(gamepadId), newValue);
+				break;
+			//dpad-bottom
+			case 13:
+				if ( newValue == 0 )
+					dispatchGamepadEvent(GamepadEvent.DPAD_BOTTOM_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.DPAD_BOTTOM_DOWN, int(gamepadId), newValue);
+				break;
+				break;
+			//dpad left
+			case 14:
+				if ( newValue == 0 )
+					dispatchGamepadEvent(GamepadEvent.DPAD_LEFT_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.DPAD_LEFT_DOWN, int(gamepadId), newValue);
+				break;
+				break;
+			//dpad right
+			case 15:
+				if ( newValue == 0 )
+					dispatchGamepadEvent(GamepadEvent.DPAD_RIGHT_UP, int(gamepadId), newValue);
+				else
+					dispatchGamepadEvent(GamepadEvent.DPAD_RIGHT_DOWN, int(gamepadId), newValue);
+				break;
+				break;
 		}
-		if(gamepadSupport.gamepads.length == 0) {
-			gamepadSupport.stopPolling();
-		}
-		//tester.updateGamepads(gamepadSupport.gamepads);
-	},
-	startPolling: function () {
-		console.log("js startPolling");
-		if (!gamepadSupport.ticking) {
-			gamepadSupport.ticking = true;
-			document.getElementById("AS3Gamepadexample").startTicking(); //call as3 function to start calling the tick function
-		}
-	},
-	stopPolling: function () {
-		gamepadSupport.ticking = false;
-	},
-	tick: function () {
-		gamepadSupport.pollStatus();
-		//gamepadSupport.scheduleNextTick();
-	},
-	scheduleNextTick: function () {
-		if (gamepadSupport.ticking) {
-			if (window.requestAnimationFrame) {
-				window.requestAnimationFrame(gamepadSupport.tick);
-			} else if (window.mozRequestAnimationFrame) {
-				window.mozRequestAnimationFrame(gamepadSupport.tick);
-			} else if (window.webkitRequestAnimationFrame) {
-				window.webkitRequestAnimationFrame(gamepadSupport.tick);
-			}
-		}
-	},
-	pollStatus: function () {
-		gamepadSupport.pollGamepads();
-		for (var i in gamepadSupport.gamepads) {
-			var gamepad = gamepadSupport.gamepads[i];
-			if (gamepad.timestamp && (gamepad.timestamp == gamepadSupport.prevTimestamps[i])) {
-				continue;
-			}
-			gamepadSupport.prevTimestamps[i] = gamepad.timestamp;
-			gamepadSupport.updateDisplay(i);
-		}
-	},
-	pollGamepads: function () {
-		console.log("pollGamepads");
-		var rawGamepads = (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) || navigator.webkitGamepads;
-		if (rawGamepads) {
-			gamepadSupport.gamepads = [];
-			var gamepadsChanged = false;
-			for (var i = 0; i < rawGamepads.length; i++) {
-				if (typeof rawGamepads[i] != gamepadSupport.prevRawGamepadTypes[i]) {
-					gamepadsChanged = true;
-					gamepadSupport.prevRawGamepadTypes[i] = typeof rawGamepads[i];
-				}
-				if(rawGamepads[i]) {
-					gamepadSupport.gamepads.push(rawGamepads[i]);
-				}
-			}
-			if(gamepadsChanged) {
-				document.getElementById("AS3Gamepadexample").onGamepadConnect();
-				//tester.updateGamepads(gamepadSupport.gamepads);
-			}
-		}
-	},
-	updateDisplay: function (gamepadId) {
-		var gamepad = gamepadSupport.gamepads[gamepadId];
-		
-		//call as3 function to update button states
-		document.getElementById("AS3Gamepadexample").updateButtons(gamepad.buttons, gamepadId); 
-		document.getElementById("AS3Gamepadexample").updateAxes(gamepad.axes, gamepadId);
-		
-		/*tester.updateButton(gamepad.buttons[0], gamepadId, 'button-1');
-		tester.updateButton(gamepad.buttons[1], gamepadId, 'button-2');
-		tester.updateButton(gamepad.buttons[2], gamepadId, 'button-3');
-		tester.updateButton(gamepad.buttons[3], gamepadId, 'button-4');
-		tester.updateButton(gamepad.buttons[4], gamepadId, 'button-left-shoulder-top');
-		tester.updateButton(gamepad.buttons[6], gamepadId, 'button-left-shoulder-bottom');
-		tester.updateButton(gamepad.buttons[5], gamepadId, 'button-right-shoulder-top');
-		tester.updateButton(gamepad.buttons[7], gamepadId, 'button-right-shoulder-bottom');
-		tester.updateButton(gamepad.buttons[8], gamepadId, 'button-select');
-		tester.updateButton(gamepad.buttons[9], gamepadId, 'button-start');
-		tester.updateButton(gamepad.buttons[10], gamepadId, 'stick-1');
-		tester.updateButton(gamepad.buttons[11], gamepadId, 'stick-2');
-		tester.updateButton(gamepad.buttons[12], gamepadId, 'button-dpad-top');
-		tester.updateButton(gamepad.buttons[13], gamepadId, 'button-dpad-bottom');
-		tester.updateButton(gamepad.buttons[14], gamepadId, 'button-dpad-left');
-		tester.updateButton(gamepad.buttons[15], gamepadId, 'button-dpad-right');
-		tester.updateAxis(gamepad.axes[0], gamepadId, 'stick-1-axis-x', 'stick-1', true);
-		tester.updateAxis(gamepad.axes[1], gamepadId, 'stick-1-axis-y', 'stick-1', false);
-		tester.updateAxis(gamepad.axes[2], gamepadId, 'stick-2-axis-x', 'stick-2', true);
-		tester.updateAxis(gamepad.axes[3], gamepadId, 'stick-2-axis-y', 'stick-2', false);
-		
-		var extraButtonId = gamepadSupport.TYPICAL_BUTTON_COUNT;
-		while (typeof gamepad.buttons[extraButtonId] != 'undefined') {
-			tester.updateButton(gamepad.buttons[extraButtonId], gamepadId, 'extra-button-' + extraButtonId);
-			extraButtonId++;
-		}
-		var extraAxisId = gamepadSupport.TYPICAL_AXIS_COUNT;
-		while (typeof gamepad.axes[extraAxisId] != 'undefined') {
-			tester.updateAxis(gamepad.axes[extraAxisId], gamepadId, 'extra-axis-' + extraAxisId);
-			extraAxisId++;
-		}
-		*/
 	}
-};
+	
+	protected static function dispatchGamepadEvent(name:String, gamepadId:uint, value:Number):void
+	{
+		switch( gamepadId )
+		{
+			case 0:
+				playerOne.dispatchEvent(new GamepadEvent(name, gamepadId, value ));
+				break;
+			case 1:
+				playerTwo.dispatchEvent(new GamepadEvent(name, gamepadId, value ));
+				break;
+			case 2:
+				playerThree.dispatchEvent(new GamepadEvent(name, gamepadId, value ));
+				break;
+			case 3:
+				playerFour.dispatchEvent(new GamepadEvent(name, gamepadId, value ));
+				break;
+			default:
+				playerOne.dispatchEvent(new GamepadEvent(name, gamepadId, value ));
+				break;
+		}
 	}
-	]]>
-	</script>;
-}
+}//end class
+ 
+}//end package
